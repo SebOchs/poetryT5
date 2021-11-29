@@ -7,4 +7,6 @@ Deep Learning &amp; Digital Humanities (WS 21/22): Poetry generation with ByT5
 > conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch  
 > pip install transformers  
 > pip install pytorch-lightning  
-> pip install datasets
+> pip install datasets  
+> pip install scikit-learn  
+> pip install pandas

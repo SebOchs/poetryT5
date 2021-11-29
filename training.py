@@ -32,7 +32,7 @@ def finetuning(batch_size=2, epochs=4, acc_grad=4, top_k=3):
         callbacks=[checkpoint_callback, early],
         num_sanity_val_steps=10,
         progress_bar_refresh_rate=100,
-        limit_train_batches=400,
+        limit_train_batches=1000,
         limit_val_batches=400
         # stochastic_weight_avg=False
     )

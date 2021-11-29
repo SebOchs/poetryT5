@@ -2,9 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from itertools import permutations, compress
-import spacy
 
-nlp = spacy.load('en_core_web_md')
 np.random.seed(123)
 
 
