@@ -10,3 +10,5 @@ Deep Learning &amp; Digital Humanities (WS 21/22): Poetry generation with ByT5
 > pip install datasets  
 > pip install scikit-learn  
 > pip install pandas
+> pip install editdistance
+> pip install pronouncing

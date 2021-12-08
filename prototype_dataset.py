@@ -65,5 +65,17 @@ def prototype_dataset(file_path, ratio=1):
     test_df.to_csv("dataset/rhyme_test.csv", sep=',')
 
 
+def pure_generative_dataset(file_path):
+    df = pd.read_csv(file_path, header=None, encoding='utf-8', delimiter=',')
+    unique_rows = list(set([tuple(x) for x in df.dropna().values]))
+    split = int(len(unique_rows)*0.2)
+    dev, test, train = np.split(np.array(unique_rows), [split, 2 * split])
+    # create numpy files
+    np.save('dataset/grp_dev', dev, allow_pickle=True)
+    np.save('dataset/grp_test', test, allow_pickle=True)
+    np.save('dataset/grp_train', train, allow_pickle=True)
+
+
 if __name__ == '__main__':
-    prototype_dataset('dataset/rhyming_pairs.csv')
+    # prototype_dataset('dataset/rhyming_pairs.csv')
+    pure_generative_dataset('dataset/rhyming_pairs.csv')
