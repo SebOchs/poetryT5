@@ -14,3 +14,13 @@ First install the project using the setup.py:
 Afterwards create the dataset and preprocess it via custom commands:
 > pt5-dataset
 > pt5-preprocess
+
+Import use the custom commands within the main poetryT5 folder!
+
+## Train
+Start the training of the model via:
+> pt5-train
+
+## Inference
+Inference can be done via:
+> pt5-inference

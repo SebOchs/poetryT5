@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, random_split, ConcatDataset, Subset
 from transformers import T5ForConditionalGeneration, Adafactor, AutoTokenizer
-from utils import dataloading as dl
+import poetryT5.dataloading as dl
 import warnings
 import torch
 import numpy as np

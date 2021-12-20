@@ -65,8 +65,8 @@ def prototype_dataset(file_path, ratio=1):
     print(test_df)
 
     # save dataframes
-    train_df.to_csv("dataset/rhyme_train.csv", sep=',')
-    test_df.to_csv("dataset/rhyme_test.csv", sep=',')
+    train_df.to_csv('dataset/rhyme_train.csv', sep=',')
+    test_df.to_csv('dataset/rhyme_test.csv', sep=',')
 
 
 def pure_generative_dataset(file_path):

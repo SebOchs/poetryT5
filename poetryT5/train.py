@@ -2,7 +2,7 @@ import sys
 import os
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from utils.litByT5 import *
+from poetryT5.litByT5 import *
 import torch
 
 
@@ -41,5 +41,8 @@ def finetuning(batch_size=4, epochs=4, acc_grad=4, top_k=3):
           checkpoint_callback.best_model_path)
 
 
-if __name__ == '__main__':
+def main():
     finetuning(batch_size=32, epochs=2)
+
+if __name__ == '__main__':
+    main()

@@ -4,7 +4,6 @@ import os
 import numpy as np
 import pandas as pd
 
-
 def preprocess_rhyming(paths):
     """
     preprocess rhyming data set
@@ -15,7 +14,7 @@ def preprocess_rhyming(paths):
     tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
     # create folder for preprocessed data set
     dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
-    os.makedirs(os.path.join('../dataset', dataset_name), exist_ok=True)
+    os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
 
     for path in paths:
         current_data = pd.read_csv(path)
@@ -33,7 +32,7 @@ def preprocess_rhyming(paths):
         data = np.array(list(
             zip(preprocessed_texts.input_ids, preprocessed_texts.attention_mask, preprocessed_labels.input_ids)))
         # save preprocessed data as np array
-        np.save(os.path.join('../dataset', dataset_name, file_name), data, allow_pickle=True)
+        np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
 
 
 def preprocess_generating(paths):
@@ -42,7 +41,7 @@ def preprocess_generating(paths):
     # create folder for preprocessed data set
     dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
 
-    os.makedirs(os.path.join('../dataset', dataset_name), exist_ok=True)
+    os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
     for path in paths:
         current_data = np.load(path, allow_pickle=True)
         file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
@@ -53,11 +52,11 @@ def preprocess_generating(paths):
                                for x in current_data[:, 1:]]
         # save all preprocessed possibilities for a given input
         data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output)))
-        np.save(os.path.join('../dataset', dataset_name, file_name), data, allow_pickle=True)
+        np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
 
 def main():
-    # preprocess_rhyming(['../dataset/rhyme_train.csv', '../dataset/rhyme_test.csv'])
-    preprocess_generating(['../dataset/grp_dev.npy', '../dataset/grp_test.npy', '../dataset/grp_train.npy'])
+    # preprocess_rhyming(['dataset/rhyme_train.csv', 'dataset/rhyme_test.csv'])
+    preprocess_generating(['dataset/grp_dev.npy', 'dataset/grp_test.npy', 'dataset/grp_train.npy'])
 
 if __name__ == '__main__':
     main()
