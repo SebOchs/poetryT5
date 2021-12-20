@@ -7,7 +7,9 @@ np.random.seed(123)
 
 
 def prototype_dataset(file_path, ratio=1):
+    # Import dataframe
     df = pd.read_csv(file_path, header=None, encoding='utf-8', delimiter=',')
+
     # unique words/ rhyme parts in csv
     uniques = set([x for y in df.dropna().values.tolist() for x in y])
 
@@ -59,6 +61,8 @@ def prototype_dataset(file_path, ratio=1):
 
     train_df = create_df(pos_train, neg_train)
     test_df = create_df(pos_test, neg_test)
+    print(train_df)
+    print(test_df)
 
     # save dataframes
     train_df.to_csv("dataset/rhyme_train.csv", sep=',')
@@ -70,12 +74,16 @@ def pure_generative_dataset(file_path):
     unique_rows = list(set([tuple(x) for x in df.dropna().values]))
     split = int(len(unique_rows)*0.2)
     dev, test, train = np.split(np.array(unique_rows), [split, 2 * split])
+
     # create numpy files
     np.save('dataset/grp_dev', dev, allow_pickle=True)
     np.save('dataset/grp_test', test, allow_pickle=True)
     np.save('dataset/grp_train', train, allow_pickle=True)
 
 
-if __name__ == '__main__':
-    # prototype_dataset('dataset/rhyming_pairs.csv')
+def main():
+    #prototype_dataset('dataset/rhyming_pairs.csv')
     pure_generative_dataset('dataset/rhyming_pairs.csv')
+
+if __name__ == '__main__':
+    main()

@@ -41,6 +41,7 @@ def preprocess_generating(paths):
     tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
     # create folder for preprocessed data set
     dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
+
     os.makedirs(os.path.join('../dataset', dataset_name), exist_ok=True)
     for path in paths:
         current_data = np.load(path, allow_pickle=True)
@@ -54,7 +55,9 @@ def preprocess_generating(paths):
         data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output)))
         np.save(os.path.join('../dataset', dataset_name, file_name), data, allow_pickle=True)
 
-
-if __name__ == '__main__':
+def main():
     # preprocess_rhyming(['../dataset/rhyme_train.csv', '../dataset/rhyme_test.csv'])
     preprocess_generating(['../dataset/grp_dev.npy', '../dataset/grp_test.npy', '../dataset/grp_train.npy'])
+
+if __name__ == '__main__':
+    main()

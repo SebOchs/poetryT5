@@ -1,0 +1,7 @@
+transformers
+pytorch-lightning
+datasets
+scikit-learn
+pandas
+editdistance
+pronouncing
