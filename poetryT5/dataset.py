@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from itertools import permutations, compress
+from pathlib import Path
 
 np.random.seed(123)
 
@@ -80,10 +81,27 @@ def pure_generative_dataset(file_path):
     np.save('dataset/grp_test', test, allow_pickle=True)
     np.save('dataset/grp_train', train, allow_pickle=True)
 
+def rhymes_dataset(file_path):
+    df = pd.read_csv(file_path, usecols=[1,2,3], encoding='utf-8', delimiter=',')
+
+    # Filter only rows with 4 lines for the time being
+    df = df.loc[df['Line count'] == 4]
+
+    # Then shuffle dataset
+    df = df.sample(frac = 1)
+
+    split = int(len(df)*0.2)
+    dev, test, train = np.split(df, [split, 2 * split])
+
+    # create numpy files
+    np.save('dataset/rhymes_dev', dev, allow_pickle=True)
+    np.save('dataset/rhymes_test', test, allow_pickle=True)
+    np.save('dataset/rhymes_train', train, allow_pickle=True)
 
 def main():
     #prototype_dataset('dataset/rhyming_pairs.csv')
-    pure_generative_dataset('dataset/rhyming_pairs.csv')
+    #pure_generative_dataset('dataset/rhyming_pairs.csv')
+    rhymes_dataset('dataset/4_line_rhymes.csv')
 
 if __name__ == '__main__':
     main()
