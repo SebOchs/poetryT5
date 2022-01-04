@@ -6,7 +6,7 @@ from poetryT5.litByT5 import *
 import torch
 
 
-def finetuning(batch_size=4, epochs=4, acc_grad=4, top_k=3):
+def finetuning(batch_size=1, epochs=4, acc_grad=4, top_k=3):
     # Checkpointing
     checkpoint_callback = ModelCheckpoint(
         dirpath='models/',
@@ -23,7 +23,7 @@ def finetuning(batch_size=4, epochs=4, acc_grad=4, top_k=3):
         verbose=False
     )
     # Initialize model and trainer
-    poetry_model = LitGenRhymeT5(batch_size)
+    poetry_model = LitGenRhymesT5(batch_size)
     trainer = pl.Trainer(
         gpus=1,
         max_epochs=epochs,

@@ -11,7 +11,4 @@ def to_decoder_only(byt5_model):
     Args:
         byt5_model: byt5 model
     """
-    model = copy.deepcopy(byt5_model)
-    decoder = copy.deepcopy(byt5_model.get_decoder())
-
-    del model.encoder
+    return byt5_model.get_decoder()
