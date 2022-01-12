@@ -90,13 +90,11 @@ def rhymes_dataset(file_path):
     # Then shuffle dataset
     df = df.sample(frac = 1)
 
-    split = int(len(df)*0.2)
-    dev, test, train = np.split(df, [split, 2 * split])
+    # and convert to numpy array
+    df = np.array(df)
 
     # create numpy files
-    np.save('dataset/rhymes_dev', dev, allow_pickle=True)
-    np.save('dataset/rhymes_test', test, allow_pickle=True)
-    np.save('dataset/rhymes_train', train, allow_pickle=True)
+    np.save('dataset/rhymes', df, allow_pickle=True)
 
 def main():
     #prototype_dataset('dataset/rhyming_pairs.csv')

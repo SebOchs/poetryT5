@@ -131,3 +131,4 @@ dmypy.json
 # Custom ignores
 dataset/
 lightning_logs/
+models/

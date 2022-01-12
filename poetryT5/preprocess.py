@@ -54,30 +54,30 @@ def preprocess_generating(paths):
         data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output)))
         np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
 
-def preprocess_rhymes(paths):
+def preprocess_rhymes(path):
     # Init tokenizer
     tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
 
     # create folder for preprocessed data set
-    dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
+    dataset_name = 'rhymes'
 
     os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
-    for path in paths:
-        current_data = np.load(path, allow_pickle=True)
-        file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
 
-        # Preprocess input and output
-        preprocessed_input = tokenizer(['rhyme: ' + x for x in current_data[:, 1]], padding='longest')
-        preprocessed_output = tokenizer([' '.join(eval(x))  for x in current_data[:, 0]], padding='longest')
+    current_data = np.load(path, allow_pickle=True)
+    file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
 
-        # save all preprocessed possibilities for a given input
-        data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output.input_ids)))
-        np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
+    # Preprocess input and output
+    preprocessed_input = tokenizer([x for x in current_data[:, 1]], padding='longest')
+    preprocessed_output = tokenizer(['\n'.join(eval(x))  for x in current_data[:, 0]], padding='longest')
+
+    # save all preprocessed possibilities for a given input
+    data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output.input_ids)))
+    np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
 
 def main():
     # preprocess_rhyming(['dataset/rhyme_train.csv', 'dataset/rhyme_test.csv'])
     # preprocess_generating(['dataset/grp_dev.npy', 'dataset/grp_test.npy', 'dataset/grp_train.npy'])
-    preprocess_rhymes(['dataset/rhymes_dev.npy', 'dataset/rhymes_test.npy', 'dataset/rhymes_train.npy'])
+    preprocess_rhymes('dataset/rhymes.npy')
 
 if __name__ == '__main__':
     main()

@@ -9,6 +9,7 @@ from sklearn import metrics
 import pronouncing
 import editdistance
 import itertools
+from transformers.modeling_outputs import BaseModelOutputWithPastAndCrossAttentions
 
 pl.seed_everything(123)
 
@@ -198,33 +199,49 @@ class LitGenRhymeT5(pl.LightningModule):
 
 class LitGenRhymesT5(pl.LightningModule):
 
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, model_size='base'):
         super(LitGenRhymesT5, self).__init__()
-        self.model = T5ForConditionalGeneration.from_pretrained('google/byt5-base')
-        self.tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
+        self.model = T5ForConditionalGeneration.from_pretrained(f'google/byt5-{model_size}')
+        # To decoder only
+        del self.model.encoder
+
+        self.tokenizer = AutoTokenizer.from_pretrained(f'google/byt5-{model_size}')
         self.batch_size = batch_size
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=-100)
         # Data loading
-        self.train_set = dl.T5Dataset('dataset/rhymes/rhymes_train.npy')
-        self.dev_set = dl.T5Dataset('dataset/rhymes/rhymes_dev.npy')
-        self.test_set = dl.T5Dataset('dataset/rhymes/rhymes_test.npy')
+        self.train_set = dl.T5Dataset('dataset/rhymes/rhymes.npy')
+        self.dev_set = self.train_set
+        self.test_set = self.train_set
         self.save_hyperparameters()
+        # All possible input tensors in tokenized form
+        self.aabb = torch.tensor([100, 100, 101, 101,   1])
+        self.abab = torch.tensor([100, 101, 100, 101,   1])
+        self.abba = torch.tensor([100, 101, 101, 100,   1])
 
     def forward(self, tok_seq, attn_seq):
         return [self.tokenizer.decode(x, skip_special_tokens=True)
                 for x in self.model.generate(input_ids=tok_seq, attention_mask=attn_seq)]
 
     def training_step(self, batch, batch_idx):
+        # Get training data
         schema, attn, rhymes = batch
-        min_loss = []
+
+        # Get encoder output to skip the encoder
+        hidden_state = torch.zeros(schema.shape[0], 5, 1472)
+        for i, id in enumerate(schema):
+            if torch.all(id == self.aabb):
+                hidden_state[i] = 0
+            elif torch.all(id == self.abab):
+                hidden_state[i] = 0.1
+            elif torch.all(id == self.abba):
+                hidden_state[i] = 0.2
+        encoder_outputs = BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=hidden_state)
 
         # loss calculation
-        for i in range(schema.shape[0]):
-            loss = self.model(input_ids=torch.unsqueeze(schema[i].contiguous(), 0),
-                                          attention_mask=torch.unsqueeze(attn[i].contiguous(), 0),
-                                          labels=torch.unsqueeze(rhymes[i].contiguous(), 0)).loss
-            min_loss.append(loss)
-        return torch.tensor(min_loss, requires_grad=True).mean()
+        loss = self.model(encoder_outputs=encoder_outputs,
+                          labels=rhymes).loss
+
+        return loss
 
     def validation_step(self, batch, batch_idx):
         schema, attn, rhymes = batch
@@ -253,7 +270,7 @@ class LitGenRhymesT5(pl.LightningModule):
         #         zip(pred_pron, label_pron)]
         #average_edit_distance = np.average([min([editdistance.eval(x[0].split(), x[1].split()) for x in y], default=10)
         #                                    for y in pairs])
-        #self.log('distance', average_edit_distance)
+        self.log('distance', 0)#average_edit_distance)
         #print('Average edit distance: ', average_edit_distance)
 
     def test_step(self, batch, batch_idx):
@@ -272,7 +289,7 @@ class LitGenRhymesT5(pl.LightningModule):
         #self.log('f1', metrics.f1_score(prepped_labels, extracted, average='macro'))
 
     def configure_optimizers(self):
-        return Adafactor(self.model.parameters(), lr=None, warmup_init=True, relative_step=True)
+        return Adafactor(self.model.parameters(), lr=None, warmup_init=True, relative_step=True, scale_parameter=True)
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=False)
