@@ -213,21 +213,23 @@ class LitGenRhymesT5(pl.LightningModule):
         self.dev_set = self.train_set
         self.test_set = self.train_set
         self.save_hyperparameters()
+
+        self.hidden_size = 1472 if model_size == 'small' else 1536
+
         # All possible input tensors in tokenized form
-        self.aabb = torch.tensor([100, 100, 101, 101,   1])
-        self.abab = torch.tensor([100, 101, 100, 101,   1])
-        self.abba = torch.tensor([100, 101, 101, 100,   1])
+        self.register_buffer('aabb', torch.tensor([100, 100, 101, 101, 1]))
+        self.register_buffer('abab', torch.tensor([100, 101, 100, 101, 1]))
+        self.register_buffer('abba', torch.tensor([100, 101, 101, 100, 1]))
 
-    def forward(self, tok_seq, attn_seq):
+    def forward(self, schema):
+        encoder_outputs = self.get_encoder_outputs(schema)
         return [self.tokenizer.decode(x, skip_special_tokens=True)
-                for x in self.model.generate(input_ids=tok_seq, attention_mask=attn_seq)]
+                for x in self.model.generate(encoder_outputs=encoder_outputs, min_length=90, max_length=300, do_sample=True)]
 
-    def training_step(self, batch, batch_idx):
-        # Get training data
-        schema, attn, rhymes = batch
+    def get_encoder_outputs(self, schema):
+        # Gets the hardcoded encoder outputs to skip the encoder
+        hidden_state = torch.zeros(schema.shape[0], 5, self.hidden_size, device=self.device)
 
-        # Get encoder output to skip the encoder
-        hidden_state = torch.zeros(schema.shape[0], 5, 1472)
         for i, id in enumerate(schema):
             if torch.all(id == self.aabb):
                 hidden_state[i] = 0
@@ -236,6 +238,14 @@ class LitGenRhymesT5(pl.LightningModule):
             elif torch.all(id == self.abba):
                 hidden_state[i] = 0.2
         encoder_outputs = BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=hidden_state)
+        return encoder_outputs
+
+    def training_step(self, batch, batch_idx):
+        # Get training data
+        schema, attn, rhymes = batch
+
+        # Get encoder output to skip the encoder
+        encoder_outputs = self.get_encoder_outputs(schema)
 
         # loss calculation
         loss = self.model(encoder_outputs=encoder_outputs,
@@ -245,16 +255,17 @@ class LitGenRhymesT5(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         schema, attn, rhymes = batch
-        return {
-            'original': [self.tokenizer.decode(y, skip_special_tokens=True).replace('word: ', '') for y in schema],
-            'prediction': self(schema, attn),
-            'label': [[self.tokenizer.decode(y, skip_special_tokens=True) for y in x] for x in rhymes],
-        }
+        return {}
+        #{
+        #    'original': [self.tokenizer.decode(y, skip_special_tokens=True).replace('word: ', '') for y in schema],
+        #    'prediction': self(schema),
+        #    'label': [[self.tokenizer.decode(y, skip_special_tokens=True) for y in x] for x in rhymes],
+        #}
 
     def validation_epoch_end(self, outputs):
-        original = [x for y in [x['original'] for x in outputs] for x in y]
-        predictions = [x for y in [x['prediction'] for x in outputs] for x in y]
-        label = [x for y in [x['label'] for x in outputs] for x in y]
+        #original = [x for y in [x['original'] for x in outputs] for x in y]
+        #predictions = [x for y in [x['prediction'] for x in outputs] for x in y]
+        #label = [x for y in [x['label'] for x in outputs] for x in y]
         # remove last char from predictions if it is non-alphabetic and only return last generated word
         #extr_predictions = [x.split()[-1] if x[-1].isalpha() else x[:-2].split()[-1] for x in predictions]
         # kick out predicted words that are only copying input

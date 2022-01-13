@@ -15,7 +15,7 @@ def inference(checkpoint, schema):
     ckpt.freeze()
 
     # Get hidden state to skip the encoder
-    hidden_state = torch.zeros(1, 5, 1472)
+    hidden_state = torch.zeros(1, 5, ckpt.hidden_size)
     if schema=="aabb":
         hidden_state[0] = 0
     elif schema=="abab":
@@ -25,10 +25,11 @@ def inference(checkpoint, schema):
     encoder_outputs = BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=hidden_state)
 
     # Min and max length of 4 liners in dataset
-    generation = ckpt.model.generate(encoder_outputs=encoder_outputs, min_length=90, max_length=300, do_sample=True) # no_repeat_ngram_size = 3, length_penalty = 2.0,
-    output = tokenizer.decode(generation[0], skip_special_tokens=True)
+    # no_repeat_ngram_size = 3, length_penalty = 2.0,
+    generation = ckpt.model.generate(encoder_outputs=encoder_outputs, max_length=200, do_sample=True, num_return_sequences=10)
+    for x in generation:
+        print(tokenizer.decode(x, skip_special_tokens=True))
+        print('---------')
 
-    print(output)
 
-
-inference('models/rhyme_gen_t5_epoch=8-distance=0.0000.ckpt', 'aabb')
+inference('models/rhyme_gen_t5_epoch=22-distance=0.0000.ckpt', 'aabb')
