@@ -15,13 +15,16 @@ def inference(checkpoint, schema):
     ckpt.freeze()
 
     # Get hidden state to skip the encoder
-    hidden_state = torch.zeros(1, 5, ckpt.hidden_size)
+    encoder_hidden = np.load('dataset/encoder_hidden.npy', allow_pickle=True).item()
+    hidden_state = None
     if schema=="aabb":
-        hidden_state[0] = 0
+        hidden_state = torch.tensor(encoder_hidden['aabb_small'])
     elif schema=="abab":
-        hidden_state[0] = 0.1
+        hidden_state = torch.tensor(encoder_hidden['abab_small'])
     elif schema=="abba":
-        hidden_state[0] = 0.2
+        hidden_state = torch.tensor(encoder_hidden['abba_small'])
+    else:
+        print('UNSUPPORTED SCHEMA!')
     encoder_outputs = BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=hidden_state)
 
     # Min and max length of 4 liners in dataset
