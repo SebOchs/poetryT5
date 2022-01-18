@@ -32,4 +32,4 @@ def inference(checkpoint, schema):
         print('---------')
 
 
-inference('models/rhyme_gen_t5_epoch=22-distance=0.0000.ckpt', 'aabb')
+inference('models/rhyme_gen_t5_new.ckpt', 'aabb')

@@ -82,10 +82,7 @@ def pure_generative_dataset(file_path):
     np.save('dataset/grp_train', train, allow_pickle=True)
 
 def rhymes_dataset(file_path):
-    df = pd.read_csv(file_path, usecols=[1,2,3], encoding='utf-8', delimiter=',')
-
-    # Filter only rows with 4 lines for the time being
-    df = df.loc[df['Line count'] == 4]
+    df = pd.read_csv(file_path, usecols=[1,2], encoding='utf-8', delimiter=',')
 
     # Then shuffle dataset
     df = df.sample(frac = 1)
@@ -99,7 +96,7 @@ def rhymes_dataset(file_path):
 def main():
     #prototype_dataset('dataset/rhyming_pairs.csv')
     #pure_generative_dataset('dataset/rhyming_pairs.csv')
-    rhymes_dataset('dataset/4_line_rhymes.csv')
+    rhymes_dataset('dataset/big_four_liner_dataset.csv')
 
 if __name__ == '__main__':
     main()
