@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 # Custom ignores
+dataset/
 lightning_logs/
 models/
