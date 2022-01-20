@@ -21,7 +21,7 @@ def evaluate(poetry, scheme):
 
     def get_last_words(x):
         """
-        gets last alphabetical word of a sentence
+        gets last alphabetical words from a list of sentences
         :param x: list of strings / list of sentences
         :return: list of strings / list of words
         """
@@ -37,23 +37,24 @@ def evaluate(poetry, scheme):
                     result.append('')
             return result
 
-    def min_edit_distance(a, b):
+    def min_edit_distance(a, b, n=4):
         """
         calculates minimum edit distance between word a and b based on their possible pronunciations
         :param a: string / word
         :param b: string / word
+        :param n: int / number of last phonemes to check, default 4
         :return: float / minimum edit distance based on phonemes
         """
         # get pronunciations
-        a_phonemes = pronouncing.phones_for_word(a.lower())
+        a_phonemes = pronouncing.phones_for_word(a)
         if not a_phonemes:
             a_phonemes = g2p(a)
-        b_phonemes = pronouncing.phones_for_word(b.lower())
+        b_phonemes = pronouncing.phones_for_word(b)
         if not b_phonemes:
             b_phonemes = g2p(b)
 
-        return min([editdistance.eval(c.split()[:4], d.split()[:4]) for c, d in product(a_phonemes, b_phonemes)],
-                   default=4)
+        return min([editdistance.eval(c.split()[-n:], d.split()[-n:]) for c, d in product(a_phonemes, b_phonemes)],
+                   default=n)
 
     last_words = get_last_words(poetry.split('\n'))
     if len(last_words) != 4:
@@ -75,7 +76,7 @@ def evaluate(poetry, scheme):
 
 
 # Example on how to evaluate poems with given rhyming schemes
-df = pd.read_csv('../dataset/big_four_liner_dataset.csv', index_col=0)
+df = pd.read_csv('../dataset/four_line_poetry.csv', index_col=0)
 metric_vals = []
 for i, row in tqdm(df.iterrows(), total=df.shape[0]):
     metric_vals.append(evaluate(row.poem, row.label))
