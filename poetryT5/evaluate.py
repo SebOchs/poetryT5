@@ -48,10 +48,10 @@ def evaluate(poetry, scheme):
         # get pronunciations
         a_phonemes = pronouncing.phones_for_word(a)
         if not a_phonemes:
-            a_phonemes = g2p(a)
+            a_phonemes = [' '.join(g2p(a))]
         b_phonemes = pronouncing.phones_for_word(b)
         if not b_phonemes:
-            b_phonemes = g2p(b)
+            b_phonemes = [' '.join(g2p(b))]
 
         return min([editdistance.eval(c.split()[-n:], d.split()[-n:]) for c, d in product(a_phonemes, b_phonemes)],
                    default=n)
