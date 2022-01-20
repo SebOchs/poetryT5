@@ -6,7 +6,7 @@ from poetryT5.litByT5 import *
 import torch
 
 
-def finetuning(batch_size=16, epochs=4, acc_grad=4, top_k=3, model_size='small'):
+def finetuning(batch_size=16, epochs=4, acc_grad=8, top_k=3, model_size='small'):
     # Checkpointing
     checkpoint_callback = ModelCheckpoint(
         dirpath='models/',
@@ -43,7 +43,7 @@ def finetuning(batch_size=16, epochs=4, acc_grad=4, top_k=3, model_size='small')
 
 
 def main():
-    finetuning(batch_size=16, epochs=20, top_k=20, model_size='small')
+    finetuning(batch_size=8, acc_grad=32, epochs=100, top_k=100, model_size='small')
 
 if __name__ == '__main__':
     main()

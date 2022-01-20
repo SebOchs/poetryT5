@@ -68,7 +68,7 @@ def preprocess_rhymes(path):
 
     # Preprocess input and output
     preprocessed_input = tokenizer([x for x in current_data[:, 1]], padding='longest')
-    preprocessed_output = tokenizer(['\n'.join(eval(x))  for x in current_data[:, 0]], padding='longest')
+    preprocessed_output = tokenizer([x for x in current_data[:, 0]], padding='longest')
 
     # save all preprocessed possibilities for a given input
     data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output.input_ids)))
