@@ -29,10 +29,10 @@ def inference(checkpoint, schema):
 
     # Min and max length of 4 liners in dataset
     # no_repeat_ngram_size = 3, length_penalty = 2.0,
-    generation = ckpt.model.generate(encoder_outputs=encoder_outputs, max_length=200, do_sample=True, num_return_sequences=10)
+    generation = ckpt.model.generate(encoder_outputs=encoder_outputs, max_length=200, do_sample=True, num_return_sequences=20)
     for x in generation:
         print(tokenizer.decode(x, skip_special_tokens=True))
         print('---------')
 
 
-inference('models/rhyme_gen_t5_new.ckpt', 'aabb')
+inference('models/rhyme_gen_t5_epoch=30-distance=2.0033.ckpt', 'abab')

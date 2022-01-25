@@ -1,9 +1,9 @@
 import sys
 import os
+import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from poetryT5.litByT5 import *
-import torch
 
 
 def finetuning(batch_size=16, epochs=4, acc_grad=8, top_k=3, model_size='small'):

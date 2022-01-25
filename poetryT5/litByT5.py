@@ -278,9 +278,9 @@ class LitGenRhymesT5(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         # Generate 50 ryhmes per schema and then validate
-        gen_aabb = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.aabb_hidden), max_length=200, do_sample=True, num_return_sequences=50)
-        gen_abab = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.abab_hidden), max_length=200, do_sample=True, num_return_sequences=50)
-        gen_abba = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.abba_hidden), max_length=200, do_sample=True, num_return_sequences=50)
+        gen_aabb = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.aabb_hidden), max_length=200, do_sample=True, num_return_sequences=100)
+        gen_abab = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.abab_hidden), max_length=200, do_sample=True, num_return_sequences=100)
+        gen_abba = self.model.generate(encoder_outputs=BaseModelOutputWithPastAndCrossAttentions(last_hidden_state=self.abba_hidden), max_length=200, do_sample=True, num_return_sequences=100)
 
         # Calculate phoneme minimum edit distance
         min_phon_dists = []
@@ -336,7 +336,7 @@ class LitGenRhymesT5(pl.LightningModule):
 
         def get_last_words(x):
             """
-            gets last alphabetical word of a sentence
+            gets last alphabetical words from a list of sentences
             :param x: list of strings / list of sentences
             :return: list of strings / list of words
             """
@@ -352,23 +352,24 @@ class LitGenRhymesT5(pl.LightningModule):
                         result.append('')
                 return result
 
-        def min_edit_distance(a, b):
+        def min_edit_distance(a, b, n=4):
             """
             calculates minimum edit distance between word a and b based on their possible pronunciations
             :param a: string / word
             :param b: string / word
+            :param n: int / number of last phonemes to check, default 4
             :return: float / minimum edit distance based on phonemes
             """
             # get pronunciations
-            a_phonemes = pronouncing.phones_for_word(a.lower())
+            a_phonemes = pronouncing.phones_for_word(a)
             if not a_phonemes:
-                a_phonemes = self.g2p(a)
-            b_phonemes = pronouncing.phones_for_word(b.lower())
+                a_phonemes = [' '.join(self.g2p(a))]
+            b_phonemes = pronouncing.phones_for_word(b)
             if not b_phonemes:
-                b_phonemes = self.g2p(b)
+                b_phonemes = [' '.join(self.g2p(b))]
 
-            return min([editdistance.eval(c.split()[:4], d.split()[:4]) for c, d in product(a_phonemes, b_phonemes)],
-                    default=4)
+            return min([editdistance.eval(c.split()[-n:], d.split()[-n:]) for c, d in product(a_phonemes, b_phonemes)],
+                    default=n)
 
         last_words = get_last_words(poetry.split('\n'))
         if len(last_words) != 4:

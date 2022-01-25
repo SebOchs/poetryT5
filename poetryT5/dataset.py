@@ -96,7 +96,7 @@ def rhymes_dataset(file_path):
 def main():
     #prototype_dataset('dataset/rhyming_pairs.csv')
     #pure_generative_dataset('dataset/rhyming_pairs.csv')
-    rhymes_dataset('dataset/big_four_liner_dataset.csv')
+    rhymes_dataset('dataset/four_liner_dataset4.csv')
 
 if __name__ == '__main__':
     main()
