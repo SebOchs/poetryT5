@@ -23,7 +23,7 @@ def finetuning(batch_size=16, epochs=4, acc_grad=8, top_k=3, model_size='small')
     #    verbose=False
     #)
     # Initialize model and trainer
-    poetry_model = LitGenRhymesT5(batch_size, model_size)
+    poetry_model = LitGenRhymesT5(batch_size, model_size).load_from_checkpoint('models/rhyme_gen_t5_epoch=35--distance=1.8167.ckpt')
 
     trainer = pl.Trainer(
         gpus=1,
