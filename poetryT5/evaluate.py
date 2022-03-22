@@ -7,8 +7,7 @@ from g2p_en import G2p
 from itertools import product
 from tqdm import tqdm
 
-# grapheme to phoneme converter
-g2p = G2p()
+
 
 
 def evaluate(poetry, scheme):
@@ -18,6 +17,8 @@ def evaluate(poetry, scheme):
     :param scheme: string / rhyming scheme (aabb, abab, abba)
     :return: float / average minimum edit distance of the phonemes of the last words
     """
+    # grapheme to phoneme converter
+    g2p = G2p()
 
     def get_last_words(x):
         """
@@ -75,9 +76,10 @@ def evaluate(poetry, scheme):
                                   '\"abab\" or \"abba\".')
 
 
-# Example on how to evaluate poems with given rhyming schemes
-df = pd.read_csv('../dataset/four_line_poetry.csv', index_col=0)
-metric_vals = []
-for i, row in tqdm(df.iterrows(), total=df.shape[0]):
-    metric_vals.append(evaluate(row.poem, row.label))
-print("Average minimum edit distance per poem: ", np.average(metric_vals))
+if __name__ == 'main':
+    # Example on how to evaluate poems with given rhyming schemes
+    df = pd.read_csv('dataset/four_line_poetry.csv')
+    metric_vals = []
+    for i in tqdm(df.loc[df.label == 'abba'].poem.values):
+        metric_vals.append(evaluate(i, 'abba'))
+    print("Average minimal phonemic Levenshtein distance per poem: ", np.average(metric_vals))

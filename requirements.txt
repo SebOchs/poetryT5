@@ -1,10 +1,12 @@
 transformers
 pytorch-lightning
-datasets
 scikit-learn
 pandas
 editdistance
 pronouncing
 g2p_en
-gpt-2-simple
 requests
+dload
+GitPython
+spacy
+https://github.com/MartinoMensio/spacy-universal-sentence-encoder/releases/download/v0.4.3/en_use_md-0.4.3.tar.gz#en_use_md-0.4.3

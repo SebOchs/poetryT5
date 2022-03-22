@@ -1,83 +1,63 @@
-import datasets
-from transformers import AutoTokenizer
-import os
 import numpy as np
+import os
 import pandas as pd
+from transformers import AutoTokenizer, T5ForConditionalGeneration
 
-def preprocess_rhyming(paths):
+def preprocess_rhymes(path, to_save):
     """
-    preprocess rhyming data set
-    :param paths: list of strings / paths to the csv files to preprocess
-    :return:
+    Function to preprocess the generated csv file by pt5-dataset
+    :param path: String / path to csv
+    :param to_save: String / where to save the preprocessed data
+    :return: None
     """
     # Init tokenizer
     tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
-    # create folder for preprocessed data set
-    dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
-    os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
 
-    for path in paths:
-        current_data = pd.read_csv(path)
-        file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
-        # task for byT5: input: "word1: x word2: y", output: "output: z"
-        task_data = {
-            'texts': ['word1: ' + x + ' word2: ' + y for x, y in
-                      zip(current_data['word1'].values, current_data['word2'].values)],
-            'labels': ['output: ' + str(x) for x in current_data['label']]
-        }
-        # preprocessing
-        preprocessed_texts = tokenizer(task_data['texts'], padding='longest')
-        preprocessed_labels = tokenizer(task_data['labels'], padding='longest')
-        # keep text input ids, text attention mask, label input uds
-        data = np.array(list(
-            zip(preprocessed_texts.input_ids, preprocessed_texts.attention_mask, preprocessed_labels.input_ids)))
-        # save preprocessed data as np array
-        np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
-
-
-def preprocess_generating(paths):
-    # Init tokenizer
-    tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
-    # create folder for preprocessed data set
-    dataset_name = paths[0].rsplit('/', 1)[1].rsplit('_', 1)[0]
-
-    os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
-    for path in paths:
-        current_data = np.load(path, allow_pickle=True)
-        file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
-        preprocessed_input = tokenizer(['rhyme: ' + x for x in current_data[:, 0]], padding='longest')
-        # output max
-        o_max = max(len(x) for x in tokenizer(list(current_data[:, 1:].flatten())).input_ids)
-        preprocessed_output = [tokenizer(list(x), max_length=o_max, padding='max_length', truncation=True).input_ids
-                               for x in current_data[:, 1:]]
-        # save all preprocessed possibilities for a given input
-        data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output)))
-        np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
-
-def preprocess_rhymes(path):
-    # Init tokenizer
-    tokenizer = AutoTokenizer.from_pretrained('google/byt5-base')
-
-    # create folder for preprocessed data set
-    dataset_name = 'rhymes'
-
-    os.makedirs(os.path.join('dataset', dataset_name), exist_ok=True)
-
-    current_data = np.load(path, allow_pickle=True)
-    file_name = path.rsplit('/', 1)[-1].rsplit('.')[0]
+    os.makedirs(to_save.rsplit('/', 1)[0], exist_ok=True)
+    df = pd.read_csv(path, encoding='utf-8')
 
     # Preprocess input and output
-    preprocessed_input = tokenizer([x for x in current_data[:, 1]], padding='longest')
-    preprocessed_output = tokenizer([x for x in current_data[:, 0]], padding='longest')
+    preprocessed_input = tokenizer([x for x in df.label.values], padding='longest')
+    preprocessed_output = tokenizer([x for x in df.poem.values], padding='longest')
 
     # save all preprocessed possibilities for a given input
-    data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask, preprocessed_output.input_ids)))
-    np.save(os.path.join('dataset', dataset_name, file_name), data, allow_pickle=True)
+    data = np.array(list(zip(preprocessed_input.input_ids, preprocessed_input.attention_mask,
+                             preprocessed_output.input_ids)), dtype='object')
+    np.save(to_save, data, allow_pickle=True)
+
+
+def create_hidden_states(path):
+    """
+    Function to precompute encoder results for rhyme schemes
+    :param path: String / location for precomputed hidden states
+    :return: None
+    """
+    print('Preprocessing data ...')
+    # Load model and tokenizer
+    model = T5ForConditionalGeneration.from_pretrained('google/byt5-small')
+    tokenizer = AutoTokenizer.from_pretrained('google/byt5-small')
+
+    # Calculate encoder output for pretrained model
+    input = tokenizer(['aabb', 'abab', 'abba'], return_tensors="pt")
+    out = model.encoder(input_ids=input['input_ids'], attention_mask=input['attention_mask'])['last_hidden_state']
+    out = out.detach().cpu().numpy()
+
+    # Save hidden states
+    np.save(path, {
+        'aabb_small': out[0],
+        'abab_small': out[1],
+        'abba_small': out[2],
+    })
+
 
 def main():
-    # preprocess_rhyming(['dataset/rhyme_train.csv', 'dataset/rhyme_test.csv'])
-    # preprocess_generating(['dataset/grp_dev.npy', 'dataset/grp_test.npy', 'dataset/grp_train.npy'])
-    preprocess_rhymes('dataset/rhymes.npy')
+    print("Preprocessing dataset ...")
+    preprocess_rhymes('dataset/four_line_poetry.csv', 'dataset/preprocessed/four_line_poems.npy')
+    print("Done!")
+    print("Create hidden states for rhyme schemes ...")
+    create_hidden_states('dataset/encoder_hidden.npy')
+    print('Done!')
+
 
 if __name__ == '__main__':
     main()

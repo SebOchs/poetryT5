@@ -11,9 +11,7 @@ setup(
       'console_scripts': [
         'pt5-dataset=poetryT5.dataset:main',
         'pt5-preprocess=poetryT5.preprocess:main',
-        'pt5-train=poetryT5.train:main',
-        'gpt2-train=poetryT5.train_gpt2:finetune',
-        'gpt2-generate=poetryT5.train_gpt2:generate'
+        'pt5-train=poetryT5.train:main'
       ]
   }
 )
