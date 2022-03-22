@@ -163,7 +163,7 @@ def gutenberg_rhymes(file):
 
     g2p = G2p()
     detected_rhymes = []
-    lines = [json.loads(x)['s'].strip() for x in gzip.open(file)][:100000]
+    lines = [json.loads(x)['s'].strip() for x in gzip.open(file)]
     print("Getting rhymes from gutenberg corpus, may take a long while ...")
     for candidate in tqdm(list(ngrams(lines, 4))):
         # get last word

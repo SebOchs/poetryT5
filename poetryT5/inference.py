@@ -42,5 +42,5 @@ def generate(checkpoint):
     df.to_csv('byT5_generated.csv')
 
 
-generate('models/poetrty_t5_epoch=2-distance=2.7100.ckpt')
+generate('models/poetry_t5_epoch=2-distance=2.7100.ckpt')
 

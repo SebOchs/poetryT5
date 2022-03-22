@@ -35,7 +35,7 @@ def lm_perplexity(hyps, device, name="gpt2"):
 
 
 def main():
-    df = pd.read_csv('../dataset/four_line_poetry.csv')
+    df = pd.read_csv('dataset/four_line_poetry.csv')
     print("Perplexity: ", lm_perplexity(df.loc[df.label == 'abba'].poem.values, device))
 
 
