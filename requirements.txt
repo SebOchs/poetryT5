@@ -6,3 +6,5 @@ pandas
 editdistance
 pronouncing
 g2p_en
+gpt-2-simple
+requests
