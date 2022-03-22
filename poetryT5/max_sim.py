@@ -38,7 +38,7 @@ def max_sim(file):
     for r in tqdm(abab, desc='abab'):
         nr = nlp(r)
         max_sim = 0
-        for s in search_aabb:
+        for s in search_abab:
             sim = s.similarity(nr)
             if sim > max_sim:
                 max_sim = sim
